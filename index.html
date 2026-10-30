@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BOOTICE — создание загрузочной флешки. Инструкция</title>
-<meta name="description" content="Пошаговая инструкция по созданию загрузочной USB-флешки в BOOTICE: выбор диска, запись MBR и PBR, активация раздела, копирование файлов образа.">
+<title>BOOTICE и Rufus — создание загрузочной флешки. Инструкция</title>
+<meta name="description" content="Пошаговая инструкция по созданию загрузочной USB-флешки: BOOTICE для MBR/PBR и разделов, Rufus для быстрой записи ISO. Скачать программы и сравнение.">
 <style>
   :root {
     --bg: #f6f7f9;
@@ -408,10 +408,66 @@
   }
   .skip-link:focus { left: 1rem; top: 0.6rem; }
 
+  /* Блок скачивания */
+  .downloads-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .download-card { display: flex; flex-direction: column; gap: 1rem; }
+  .download-card h3 { margin: 0; }
+  .download-desc { color: var(--muted); font-size: 0.92rem; }
+  .download-action { margin-top: auto; }
+  .download-action .button { width: 100%; }
+  .checksum {
+    margin-top: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0 1.1rem;
+  }
+  .checksum summary {
+    cursor: pointer;
+    padding: 0.85rem 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    list-style: none;
+  }
+  .checksum summary::-webkit-details-marker { display: none; }
+  .checksum p { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.35rem; }
+  .checksum code { display: block; padding-bottom: 0.95rem; background: transparent; word-break: break-all; }
+
+  /* Таблица сравнения */
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .compare {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  .compare th,
+  .compare td {
+    padding: 0.75rem 0.9rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--line);
+  }
+  .compare thead th { background: var(--surface-soft); font-weight: 600; }
+  .compare tbody th { width: 22%; font-weight: 600; }
+  .compare td { color: var(--muted); }
+  .compare tbody tr:last-child th,
+  .compare tbody tr:last-child td { border-bottom: 0; }
+
   @media (max-width: 720px) {
     h1 { font-size: 1.6rem; }
     .brand-sub { display: none; }
     .grid-2 { grid-template-columns: 1fr; }
+    .downloads-grid { grid-template-columns: 1fr; }
     .download { align-items: flex-start; }
     .button { width: 100%; }
     .download .button-wrap { width: 100%; }
@@ -438,7 +494,7 @@
   <div class="container header-inner">
     <div class="brand">
       <span class="brand-name">BOOTICE</span>
-      <span class="brand-sub">Инструкция по созданию загрузочной флешки</span>
+      <span class="brand-sub">Инструкция: BOOTICE и Rufus</span>
     </div>
     <div class="text-size" role="group" aria-label="Размер текста">
       <span class="text-size-label" aria-hidden="true">Текст</span>
@@ -454,14 +510,15 @@
 
     <section class="hero">
       <p class="eyebrow">Пошаговая инструкция</p>
-      <h1>Создание загрузочной флешки в BOOTICE</h1>
+      <h1>Создание загрузочной флешки: BOOTICE и Rufus</h1>
       <p class="lead">
         Подготовка USB-накопителя, запись главной и разделовой загрузочных записей,
-        активация раздела и копирование файлов образа. Инструкция подходит для создания
-        загрузочной флешки с WinPE или установочным образом Windows.
+        активация раздела и копирование файлов образа. Ниже — быстрый способ через Rufus
+        и сравнение: что выбрать для вашей задачи.
       </p>
       <ul class="chips">
-        <li><span>Версия</span> 1.3.3</li>
+        <li><span>BOOTICE</span> 1.3.3</li>
+        <li><span>Rufus</span> 4.15</li>
         <li><span>Система</span> Windows</li>
         <li><span>Файловая система</span> FAT32</li>
         <li><span>Загрузка</span> UEFI / BIOS</li>
@@ -469,24 +526,43 @@
     </section>
 
     <section class="section" id="download">
-      <div class="card download">
-        <div class="download-text">
-          <h2>Скачать BOOTICE</h2>
-          <p>
-            Портативная версия 1.3.3. Установка не требуется: распакуйте архив и запустите
-            <code>BOOTICE64.exe</code> (или <code>BOOTICE32.exe</code> для 32-битной системы)
-            от имени администратора.
-          </p>
-          <p class="hint">
-            В архиве: <code>BOOTICE32.exe</code>, <code>BOOTICE64.exe</code>,
-            <code>BOOTICE.dll</code>, файл настроек и папка с языковыми модулями.
-          </p>
+      <div class="section-head">
+        <h2>Скачать программы</h2>
+        <p>Обе программы портативные: установка не требуется. Запускайте их от имени администратора.</p>
+      </div>
+      <div class="downloads-grid">
+        <div class="card download-card">
+          <div>
+            <h3>BOOTICE 1.3.3</h3>
+            <p class="download-desc">
+              Низкоуровневая работа с MBR, PBR и разделами. В архиве 32- и 64-битная версии,
+              языковые модули и файл настроек.
+            </p>
+          </div>
+          <div class="download-action">
+            <a class="button" href="BootICE.zip" download>Скачать архив · 0,9 МБ</a>
+            <span class="button-note">ZIP · BOOTICE32.exe / BOOTICE64.exe</span>
+          </div>
         </div>
-        <div class="button-wrap">
-          <a class="button" href="BootICE.zip" download>Скачать архив · 0,9 МБ</a>
-          <span class="button-note">ZIP, для Windows</span>
+        <div class="card download-card">
+          <div>
+            <h3>Rufus 4.15</h3>
+            <p class="download-desc">
+              Быстрая запись ISO в один проход: форматирование, загрузчик и копирование файлов.
+              Портативная 64-битная версия.
+            </p>
+          </div>
+          <div class="download-action">
+            <a class="button" href="Rufus-4.15p.exe" download>Скачать Rufus · 1,9 МБ</a>
+            <span class="button-note">EXE · SHA-256: 84C8A437…BE106</span>
+          </div>
         </div>
       </div>
+      <details class="checksum">
+        <summary>Проверка файла Rufus</summary>
+        <p>Официальная сборка с github.com/pbatard/rufus. SHA-256:</p>
+        <code>84C8A437F8AF89257524478489E5C85F1EDF25F761D299E2BCDE46AC0AFBE106</code>
+      </details>
     </section>
 
     <section class="section" id="before">
@@ -516,10 +592,155 @@
       </div>
     </section>
 
+    <section class="section" id="compare">
+      <div class="section-head">
+        <h2>Чем Rufus отличается от BOOTICE</h2>
+        <p>Обе программы делают флешку загрузочной, но Rufus работает как мастер, а BOOTICE — как низкоуровневый редактор.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th scope="col">Критерий</th>
+              <th scope="col">BOOTICE</th>
+              <th scope="col">Rufus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Что это</th>
+              <td>Редактор загрузочных записей, разделов и секторов диска</td>
+              <td>Мастер записи ISO-образа на USB-накопитель</td>
+            </tr>
+            <tr>
+              <th scope="row">Что делает</th>
+              <td>Пишет MBR и PBR, активирует раздел. Файлы образа копируются отдельно</td>
+              <td>Сам форматирует флешку, записывает загрузчик и распаковывает ISO</td>
+            </tr>
+            <tr>
+              <th scope="row">Сколько шагов</th>
+              <td>Больше: формат, MBR, PBR, активация, копирование</td>
+              <td>Меньше: выбрать ISO и нажать «Старт»</td>
+            </tr>
+            <tr>
+              <th scope="row">Когда выбирать</th>
+              <td>Нужно исправить или заменить загрузчик, разметить диск, собрать нестандартную флешку</td>
+              <td>Обычная запись ISO: Windows, WinPE, Linux</td>
+            </tr>
+            <tr>
+              <th scope="row">Риск ошибки</th>
+              <td>Выше: больше ручных настроек и легко выбрать не тот диск</td>
+              <td>Ниже: минимум настроек, но данные всё равно удаляются</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        Для типовой задачи «записать ISO на флешку» проще Rufus. BOOTICE нужен, когда требуется
+        низкоуровневый контроль, ремонт загрузочных записей или нестандартная разметка.
+      </div>
+    </section>
+
+    <section class="section" id="rufus">
+      <div class="section-head">
+        <h2>Быстрый способ: запись через Rufus</h2>
+        <p>Rufus 4.15 делает всё в одном окне: форматирует флешку, записывает загрузчик и копирует файлы из ISO.</p>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">01</span>
+            <h3>Подключите флешку и запустите Rufus</h3>
+          </div>
+          <p>
+            Скачайте <code>Rufus-4.15p.exe</code> в разделе «Скачать программы» выше, подключите
+            USB-накопитель и запустите файл. Подтвердите запрос прав администратора.
+          </p>
+          <p>
+            В поле <strong>Устройство</strong> выберите флешку. Проверьте букву и объём: все данные
+            на выбранном диске будут удалены.
+          </p>
+        </li>
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">02</span>
+            <h3>Выберите ISO-образ</h3>
+          </div>
+          <p>
+            В блоке <strong>Выбор загрузки</strong> оставьте <strong>Диск или ISO-образ</strong>
+            и нажмите <strong>ВЫБРАТЬ</strong>. Укажите ISO с Windows, WinPE или Linux.
+          </p>
+        </li>
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">03</span>
+            <h3>Проверьте схему разделов</h3>
+          </div>
+          <p>
+            Для современных ПК с UEFI выберите <strong>Схема раздела: GPT</strong> и
+            <strong>Целевая система: UEFI (без CSM)</strong>. Для старых систем с BIOS —
+            <strong>MBR</strong> и <strong>BIOS (или UEFI-CSM)</strong>.
+          </p>
+          <p>
+            Файловая система обычно <strong>FAT32</strong> — Rufus подставит её автоматически.
+            Если Rufus предупредит, что <code>install.wim</code> больше 4 ГБ и предложит NTFS
+            с разделом UEFI:NTFS, согласитесь: это рабочий вариант для UEFI.
+          </p>
+        </li>
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">04</span>
+            <h3>Запустите запись</h3>
+          </div>
+          <p>
+            Нажмите <strong>СТАРТ</strong>. Rufus предупредит, что все данные на флешке будут
+            уничтожены. Ещё раз проверьте устройство и подтвердите запись.
+          </p>
+        </li>
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">05</span>
+            <h3>Дождитесь завершения</h3>
+          </div>
+          <p>
+            Индикатор покажет ход записи. Когда появится <strong>ГОТОВО</strong>, закройте Rufus.
+            Не вынимайте флешку во время записи.
+          </p>
+        </li>
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">06</span>
+            <h3>Загрузитесь с флешки</h3>
+          </div>
+          <p>
+            Извлеките накопитель через «Безопасное извлечение», вставьте в целевой компьютер
+            и выберите USB-устройство в Boot Menu (обычно F8, F11, F12 или Esc).
+          </p>
+        </li>
+        <li class="step">
+          <div class="step-head">
+            <span class="step-num">07</span>
+            <h3>Если образ не загружается</h3>
+          </div>
+          <p>
+            Для гибридных Linux-образов Rufus может предложить режим <strong>ISO</strong> или
+            <strong>DD</strong>. Если ISO-режим не работает, попробуйте DD: он записывает образ
+            побайтово, но стирает все данные на флешке. Для Windows обычно нужен ISO-режим.
+          </p>
+        </li>
+      </ol>
+      <div class="note">
+        Rufus также умеет создавать Windows To Go, обходить проверки TPM/Secure Boot для Windows 11
+        и делать постоянный раздел для Linux. Официальный сайт:
+        <a href="https://rufus.ie" rel="noopener">rufus.ie</a>, исходный код:
+        <a href="https://github.com/pbatard/rufus" rel="noopener">github.com/pbatard/rufus</a> (GPLv3).
+      </div>
+    </section>
+
     <section class="section" id="steps">
       <div class="section-head">
-        <h2>Пошаговая инструкция</h2>
-        <p>Скриншоты сделаны для версии 1.3.3. Нажмите на изображение, чтобы рассмотреть его крупнее.</p>
+        <h2>Пошаговая инструкция BOOTICE</h2>
+        <p>Скриншоты BOOTICE 1.3.3. Нажмите на изображение, чтобы рассмотреть его крупнее.</p>
       </div>
 
       <ol class="steps">
@@ -845,6 +1066,27 @@
           </div>
         </details>
 
+        <details>
+          <summary>Что проще: Rufus или BOOTICE?</summary>
+          <div class="faq-body">
+            <p>
+              Для обычной записи ISO — Rufus: он сам форматирует флешку, записывает загрузчик
+              и копирует файлы. BOOTICE выбирают, когда нужно вручную работать с MBR/PBR,
+              разделами или исправлять загрузку.
+            </p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Rufus нужно устанавливать?</summary>
+          <div class="faq-body">
+            <p>
+              Нет. <code>Rufus-4.15p.exe</code> — портативная версия. Запустите файл от имени
+              администратора; установка не требуется.
+            </p>
+          </div>
+        </details>
+
       </div>
     </section>
 
@@ -854,7 +1096,8 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <p>
-      Инструкция по работе с BOOTICE. Программа разработана Pauly и распространяется бесплатно.
+      Инструкция по созданию загрузочной флешки. BOOTICE разработан Pauly, Rufus — Pete Batard
+      (Akeo Consulting) и распространяется по лицензии GPLv3. Обе программы бесплатны.
     </p>
     <p>Все действия с дисками выполняются на ваш риск.</p>
   </div>
